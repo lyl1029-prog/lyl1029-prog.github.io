@@ -7,26 +7,8 @@
       "caption": "Smile",
       "alt": "Portrait"
     },
-    {
-      "id": "w2",
-      "src": "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&q=80",
-      "fullSrc": "https://images.unsplash.com/photo-1514565131-fce0801e5785?q=90",
-      "caption": "城市夜景",
-      "alt": "城市夜景摄影"
-    },
-    {
-      "id": "w3",
-      "src": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
-      "fullSrc": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=90",
-      "caption": "海边日落",
-      "alt": "海边日落摄影"
-    },
-    {
-      "id": "w4",
-      "src": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80",
-      "fullSrc": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=90",
-      "caption": "迷雾森林",
-      "alt": "森林迷雾摄影"
-    }
+
+
+
   ]
 }
