@@ -2,10 +2,10 @@
   "items": [
     {
       "id": "w1",
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-      "fullSrc": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=90",
-      "caption": "清晨的山谷",
-      "alt": "山谷风景摄影"
+      "src": "https://github.com/lyl1029-prog/lyl1029-prog.github.io/DSC08418.jpg",
+      "fullSrc": "https://github.com/lyl1029-prog/lyl1029-prog.github.io/DSC08418.jpg",
+      "caption": "Smile",
+      "alt": "Portrait"
     },
     {
       "id": "w2",
