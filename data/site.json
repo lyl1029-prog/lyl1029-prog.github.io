@@ -3,8 +3,9 @@
     "logo": "Studio",
     "heroNumber": "05",
     "label": "Visual Artist & Creative Director",
-    "title": "Framing the world\nthrough quiet light",
-    "subtitle": "Based in Shanghai — Available worldwide"
+    "title": "Framing the world through quiet light",
+    "subtitle": "Based in Shanghai — Available worldwide",
+    "heroBg": "https://raw.githubusercontent.com/lyl1029-prog/lyl1029-prog.github.io/main/DSC02310.jpg"
   },
   "about": {
     "sectionLabel": "About",
