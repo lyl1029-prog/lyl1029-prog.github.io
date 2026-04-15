@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS — Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F2EDE7; --bg-alt: #EAE3DA; --bg-card: #FDFAF7;
+      --ink: #1C1814; --ink-2: #5C5347; --ink-3: #9C9084;
+      --accent: #B87C68; --accent-hover: #A06A58;
+      --border: rgba(92,83,71,0.12); --radius: 4px;
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--bg); color: var(--ink); line-height: 1.6; }
+
+    /* ── Layout ── */
+    .cms-wrap { display: flex; min-height: 100vh; }
+    .cms-sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--ink); color: var(--white);
+      padding: 32px 0; position: fixed; top: 0; bottom: 0; left: 0;
+      display: flex; flex-direction: column;
+    }
+    .cms-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; padding: 0 24px 32px; border-bottom: 1px solid rgba(253,250,247,0.1); margin-bottom: 16px; }
+    .cms-logo small { display: block; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(253,250,247,0.35); font-family: 'DM Sans', sans-serif; margin-top: 4px; }
+    .cms-nav { flex: 1; }
+    .cms-nav button {
+      width: 100%; text-align: left; background: none; border: none;
+      color: rgba(253,250,247,0.55); font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem; letter-spacing: 0.08em; padding: 11px 24px;
+      cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent;
+    }
+    .cms-nav button:hover { color: var(--white); background: rgba(253,250,247,0.06); }
+    .cms-nav button.active { color: var(--accent); border-left-color: var(--accent); background: rgba(184,124,104,0.08); }
+    .cms-nav .nav-divider { height: 1px; background: rgba(253,250,247,0.08); margin: 12px 24px; }
+    .cms-nav .nav-section { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(253,250,247,0.25); padding: 16px 24px 6px; }
+    .cms-back { padding: 0 24px; }
+    .cms-back a { color: rgba(253,250,247,0.3); text-decoration: none; font-size: 0.72rem; letter-spacing: 0.08em; transition: color 0.2s; }
+    .cms-back a:hover { color: rgba(253,250,247,0.7); }
+
+    .cms-main { flex: 1; margin-left: 220px; padding: 40px 48px; max-width: 900px; }
+
+    /* ── Panel Header ── */
+    .panel-header { margin-bottom: 36px; }
+    .panel-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; }
+    .panel-header p { font-size: 0.82rem; color: var(--ink-3); margin-top: 4px; }
+
+    /* ── Panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Form Elements ── */
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+    .field input[type="text"],
+    .field input[type="url"],
+    .field textarea,
+    .field select {
+      width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+      transition: border-color 0.2s; outline: none;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+      position: relative; transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: 0 4px 20px rgba(28,24,20,0.06); }
+    .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .card-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 2px; background: var(--bg-alt); flex-shrink: 0; }
+    .card-thumb-placeholder { width: 64px; height: 48px; background: var(--bg-alt); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .card-title { font-size: 0.9rem; font-weight: 500; }
+    .card-sub { font-size: 0.75rem; color: var(--ink-3); margin-top: 2px; }
+    .card-actions { display: flex; gap: 8px; margin-left: auto; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 20px; font-size: 0.75rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: var(--white); }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--ink-2); }
+    .btn-ghost:hover { border-color: var(--ink-3); color: var(--ink); }
+    .btn-danger { background: none; border: 1px solid rgba(200,80,80,0.3); color: #c85050; }
+    .btn-danger:hover { background: rgba(200,80,80,0.08); }
+    .btn-sm { padding: 5px 10px; font-size: 0.68rem; }
+    .btn-icon { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: var(--radius); }
+
+    /* ── Save Bar ── */
+    .save-bar {
+      position: fixed; bottom: 0; left: 220px; right: 0;
+      background: var(--bg-card); border-top: 1px solid var(--border);
+      padding: 16px 48px; display: flex; align-items: center; justify-content: space-between;
+      transform: translateY(100%); transition: transform 0.3s var(--ease);
+      z-index: 50;
+    }
+    .save-bar.visible { transform: translateY(0); }
+    .save-bar-info { font-size: 0.78rem; color: var(--ink-3); }
+    .save-bar-info span { color: var(--accent); font-weight: 500; }
+    .save-actions { display: flex; gap: 10px; }
+    .save-actions .btn { white-space: nowrap; }
+
+    /* ── Section Titles inside panels ── */
+    .sub-section { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-3); margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .sub-section:first-child { margin-top: 0; }
+
+    /* ── Tags input ── */
+    .tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); min-height: 42px; cursor: text; transition: border-color 0.2s; }
+    .tags-wrap:focus-within { border-color: var(--accent); }
+    .tag-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--bg-alt); padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; color: var(--ink-2); }
+    .tag-chip button { background: none; border: none; cursor: pointer; color: var(--ink-3); font-size: 0.9rem; line-height: 1; padding: 0; }
+    .tag-chip button:hover { color: #c85050; }
+    .tag-input { border: none; outline: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; min-width: 80px; flex: 1; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 80px; right: 32px;
+      background: var(--ink); color: var(--white);
+      padding: 12px 20px; border-radius: 6px; font-size: 0.82rem;
+      z-index: 9999; animation: toastIn 0.3s var(--ease);
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .toast.error { background: #c85050; }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: var(--bg-card);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .upload-zone:hover { border-color: var(--accent); background: rgba(184,124,104,0.04); }
+    .upload-zone.dragover { border-color: var(--accent); background: rgba(184,124,104,0.08); }
+    .upload-zone svg { width: 32px; height: 32px; stroke: var(--ink-3); fill: none; stroke-width: 1.2; }
+    .upload-zone span { font-size: 0.78rem; color: var(--ink-3); }
+    .upload-zone small { font-size: 0.68rem; color: var(--ink-3); opacity: 0.7; }
+    .upload-zone.uploading { pointer-events: none; opacity: 0.7; }
+    .upload-zone.uploading span::after { content: ' ⏳'; }
+
+    .image-preview {
+      position: relative; display: inline-block;
+      margin-top: 8px; border-radius: 4px; overflow: hidden;
+    }
+    .image-preview img { max-width: 200px; max-height: 120px; border-radius: 4px; }
+    .image-preview button {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(200,80,80,0.9); color: white;
+      border: none; border-radius: 50%; width: 20px; height: 20px;
+      cursor: pointer; font-size: 12px; line-height: 1;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .cms-sidebar { width: 180px; }
+      .cms-main { margin-left: 180px; padding: 24px; }
+      .save-bar { left: 180px; padding: 16px 24px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .cms-wrap { flex-direction: column; }
+      .cms-sidebar { position: static; width: 100%; padding: 16px 0; flex-direction: row; align-items: center; }
+      .cms-logo { padding: 0 16px 0; border-bottom: none; border-right: 1px solid rgba(253,250,247,0.1); margin-bottom: 0; margin-right: 16px; }
+      .cms-nav { display: flex; flex-wrap: wrap; padding: 0; gap: 0; }
+      .cms-nav button { padding: 8px 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; font-size: 0.72rem; }
+      .cms-nav button.active { border-bottom-color: var(--accent); border-left: none; }
+      .cms-nav .nav-section, .cms-nav .nav-divider, .cms-back { display: none; }
+      .cms-main { margin-left: 0; }
+      .save-bar { left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cms-wrap">
+  <!-- Sidebar -->
+  <aside class="cms-sidebar">
+    <div class="cms-logo">
+      Studio
+      <small>CMS Panel</small>
+    </div>
+    <nav class="cms-nav">
+      <button class="active" data-panel="hero">✦ Hero</button>
+      <button data-panel="about">✦ About</button>
+      <button data-panel="works">✦ Works</button>
+      <button data-panel="videos">✦ Videos</button>
+      <button data-panel="projects">✦ Projects</button>
+      <div class="nav-divider"></div>
+      <div class="nav-section">Site</div>
+      <button data-panel="footer">✦ Footer</button>
+      <button data-panel="export">✦ Export</button>
+    </nav>
+    <div class="cms-back">
+      <a href="../">← Back to Site</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="cms-main">
+
+    <!-- ── Hero Panel ── -->
+    <div class="panel active" id="panel-hero">
+      <div class="panel-header">
+        <h2>Hero</h2>
+        <p>Edit the homepage hero section and site identity.</p>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Site Logo</label>
+          <input type="text" id="hero-logo" placeholder="Studio">
+        </div>
+        <div class="field">
+          <label>Hero Number (background)</label>
+          <input type="text" id="hero-number" placeholder="05">
+        </div>
+      </div>
+      <div class="field">
+        <label>Label (above title)</label>
+        <input type="text" id="hero-label">
+      </div>
+      <div class="field">
+        <label>Main Title (use &lt;br&gt; for line break)</label>
+        <textarea id="hero-title" rows="2" placeholder="Framing the world&lt;br&gt;through quiet light"></textarea>
+      </div>
+      <div class="field">
+        <label>Subtitle</label>
+        <input type="text" id="hero-subtitle">
+      </div>
+    </div>
+
+    <!-- ── About Panel ── -->
+    <div class="panel" id="panel-about">
+      <div class="panel-header">
+        <h2>About</h2>
+        <p>Edit the About section — biography, portrait photo, and statistics.</p>
+      </div>
+      <div class="sub-section">Section Header</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Section Label</label>
+          <input type="text" id="about-label">
+        </div>
+        <div class="field">
+          <label>Section Title</label>
+          <input type="text" id="about-title">
+        </div>
+      </div>
+      <div class="sub-section">Portrait Photo</div>
+      <div class="field">
+        <label>肖像照片（拖拽上传或粘贴链接）</label>
+        <div class="upload-zone" id="upload-portrait">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>拖拽或点击上传</span>
+          <small>JPG, PNG, WEBP</small>
+        </div>
+        <input type="file" id="file-portrait" accept="image/*" style="display:none">
+        <input type="url" id="about-portrait" placeholder="或直接粘贴图片链接" style="margin-top:8px">
+      </div>
+      <div class="sub-section">Biography</div>
+      <div class="field" data-paras="0">
+        <label>Paragraph 1</label>
+        <textarea id="about-para-0" rows="3"></textarea>
+      </div>
+      <div class="field" data-paras="1">
+        <label>Paragraph 2</label>
+        <textarea id="about-para-1" rows="3"></textarea>
+      </div>
+      <div class="field" data-paras="2">
+        <label>Paragraph 3</label>
+        <textarea id="about-para-2" rows="3"></textarea>
+      </div>
+      <div class="sub-section">Statistics</div>
+      <div id="stats-container"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addStat()" style="margin-top:8px">+ Add Stat</button>
+    </div>
+
+    <!-- ── Works Panel ── -->
+    <div class="panel" id="panel-works">
+      <div class="panel-header">
+        <h2>Works</h2>
+        <p>Add, edit, or remove photography works. Changes are saved to <code style="background:var(--bg-alt);padding:2px 6px;border-radius:3px;font-size:0.8em">data/works.json</code>.</p>
+      </div>
+      <div id="works-list"></div>
+      <button class="btn btn-ghost" onclick="addWork()" style="margin-top:16px">+ Add New Work</button>
+    </div>
+
+    <!-- ── Videos Panel ── -->
+    <div class="panel" id="panel-videos">
+      <div class="panel-header">
+        <h2>Videos</h2>
+        <p>Manage video works.</p>
+      </div>
+      <div id="videos-list"></div>
+      <button class="btn btn-ghost" onclick="addVideo()" style="margin-top:16px">+ Add New Video</button>
+    </div>
+
+    <!-- ── Projects Panel ── -->
+    <div class="panel" id="panel-projects">
+      <div class="panel-header">
+        <h2>Projects</h2>
+        <p>Manage portfolio projects.</p>
+      </div>
+      <div id="projects-list"></div>
+      <button class="btn btn-ghost" onclick="addProject()" style="margin-top:16px">+ Add New Project</button>
+    </div>
+
+    <!-- ── Footer Panel ── -->
+    <div class="panel" id="panel-footer">
+      <div class="panel-header">
+        <h2>Footer</h2>
+        <p>Edit the footer logo, copyright text, and social links.</p>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Footer Logo</label>
+          <input type="text" id="footer-logo">
+        </div>
+        <div class="field">
+          <label>Copyright Text</label>
+          <input type="text" id="footer-copy">
+        </div>
+      </div>
+      <div class="sub-section">Social Links</div>
+      <div id="footer-links-list"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addFooterLink()" style="margin-top:8px">+ Add Link</button>
+    </div>
+
+    <!-- ── Export Panel ── -->
+    <div class="panel" id="panel-export">
+      <div class="panel-header">
+        <h2>Export &amp; Deploy</h2>
+        <p>When you're done editing, export all JSON files and upload them to your hosting to update the live site.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;margin-bottom:8px">Step 1 — Export JSON Files</h3>
+        <p style="font-size:0.82rem;color:var(--ink-3);margin-bottom:16px">Download the updated content files. Upload them to your hosting's <code style="background:var(--bg-alt);padding:2px 6px;border-radius:3px">/data/</code> folder, replacing the old ones.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <button class="btn btn-primary" onclick="exportFile('site.json', window._siteData)">⬇ Download site.json</button>
+          <button class="btn btn-primary" onclick="exportFile('works.json', window._worksData)">⬇ Download works.json</button>
+          <button class="btn btn-primary" onclick="exportFile('videos.json', window._videosData)">⬇ Download videos.json</button>
+          <button class="btn btn-primary" onclick="exportFile('projects.json', window._projectsData)">⬇ Download projects.json</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;margin-bottom:8px">Step 2 — Deploy to Netlify (Recommended)</h3>
+        <p style="font-size:0.82rem;color:var(--ink-3);margin-bottom:16px">Upload the entire project folder (including the updated JSON files) to Netlify Drop for instant deployment.</p>
+        <a href="https://app.netlify.com/drop" target="_blank" class="btn btn-primary" style="text-decoration:none">🌐 Go to Netlify Drop</a>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;margin-bottom:8px">Step 3 — GitHub Pages</h3>
+        <p style="font-size:0.82rem;color:var(--ink-3);margin-bottom:16px">Push the updated JSON files to your GitHub repository, then GitHub Pages will automatically rebuild the site.</p>
+        <a href="https://github.com/new" target="_blank" class="btn btn-ghost" style="text-decoration:none">→ New GitHub Repo</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Save Bar -->
+<div class="save-bar" id="saveBar">
+  <div class="save-bar-info">
+    <span id="saveCount">0</span> unsaved changes
+  </div>
+  <div class="save-actions">
+    <button class="btn btn-ghost" onclick="resetAll()">Discard</button>
+    <button class="btn btn-primary" onclick="exportAll()">Export All JSON</button>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+let _siteData = null;
+let _worksData = null;
+let _videosData = null;
+let _projectsData = null;
+let _origSite = null, _origWorks = null, _origVideos = null, _origProjects = null;
+let _changes = {};
+
+// ── Boot ──
+async function boot() {
+  const base = '../';
+  try {
+    [_siteData, _worksData, _videosData, _projectsData] = await Promise.all([
+      fetch(base + 'data/site.json').then(r => r.json()),
+      fetch(base + 'data/works.json').then(r => r.json()),
+      fetch(base + 'data/videos.json').then(r => r.json()),
+      fetch(base + 'data/projects.json').then(r => r.json()),
+    ]);
+  } catch(e) {
+    showToast('⚠ Failed to load data. Make sure you\'re running via a local server (e.g. Live Server in VS Code).', true);
+    return;
+  }
+  _origSite = JSON.parse(JSON.stringify(_siteData));
+  _origWorks = JSON.parse(JSON.stringify(_worksData));
+  _origVideos = JSON.parse(JSON.stringify(_videosData));
+  _origProjects = JSON.parse(JSON.stringify(_projectsData));
+
+  renderHero();
+  renderAbout();
+  renderWorks();
+  renderVideos();
+  renderProjects();
+  renderFooter();
+  bindAllInputs();
+}
+
+// ── Navigation ──
+document.querySelectorAll('.cms-nav button[data-panel]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cms-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+  });
+});
+
+// ── Mark change ──
+let saveTimer;
+function markChange(key, newVal, oldVal) {
+  _changes[key] = { new: newVal, old: oldVal };
+  const bar = document.getElementById('saveBar');
+  const count = Object.keys(_changes).length;
+  document.getElementById('saveCount').textContent = count;
+  bar.classList.toggle('visible', count > 0);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => syncDataToMemory(), 300);
+}
+function syncDataToMemory() {
+  // Re-read all fields into _siteData / _worksData etc.
+  readHero();
+  readAbout();
+  readFooter();
+}
+
+// ── Hero ──
+function renderHero() {
+  const t = _siteData.site;
+  document.getElementById('hero-logo').value = t.logo;
+  document.getElementById('hero-number').value = t.heroNumber;
+  document.getElementById('hero-label').value = t.label;
+  document.getElementById('hero-title').value = t.title.replace(/<br\s*\/?>/gi, '\n');
+  document.getElementById('hero-subtitle').value = t.subtitle;
+}
+function readHero() {
+  const t = _siteData.site;
+  t.logo = document.getElementById('hero-logo').value;
+  t.heroNumber = document.getElementById('hero-number').value;
+  t.label = document.getElementById('hero-label').value;
+  t.title = document.getElementById('hero-title').value.replace(/\n/g, '<br>');
+  t.subtitle = document.getElementById('hero-subtitle').value;
+}
+
+// ── About ──
+function renderAbout() {
+  const a = _siteData.about;
+  document.getElementById('about-label').value = a.sectionLabel;
+  document.getElementById('about-title').value = a.sectionTitle;
+  document.getElementById('about-portrait').value = a.portrait;
+  a.paragraphs.forEach((p, i) => {
+    const el = document.getElementById('about-para-' + i);
+    if (el) el.value = p;
+  });
+  renderStats();
+  
+  // Bind portrait upload
+  const portraitZone = document.getElementById('upload-portrait');
+  const portraitInput = document.getElementById('file-portrait');
+  if (portraitZone && portraitInput) {
+    setupUploadZone(portraitZone, portraitInput, (url) => {
+      _siteData.about.portrait = url;
+      document.getElementById('about-portrait').value = url;
+      markChange('about-portrait', url, _origSite.about.portrait);
+    });
+  }
+}
+function renderStats() {
+  const container = document.getElementById('stats-container');
+  container.innerHTML = _siteData.about.stats.map((s, i) => `
+    <div class="card" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center">
+      <div class="field" style="margin:0">
+        <label>Number</label>
+        <input type="text" value="${esc(s.number)}" onchange="updateStat(${i},'number',this.value)">
+      </div>
+      <div class="field" style="margin:0">
+        <label>Label</label>
+        <input type="text" value="${esc(s.label)}" onchange="updateStat(${i},'label',this.value)">
+      </div>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="removeStat(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function updateStat(i, key, val) { _siteData.about.stats[i][key] = val; markChange('stat-'+i+'-'+key, val, _origSite.about.stats[i]?.[key]); }
+function addStat() { _siteData.about.stats.push({ number: '—', label: 'New Stat' }); renderStats(); markChange('stats-add', true, false); }
+function removeStat(i) { _siteData.about.stats.splice(i, 1); renderStats(); markChange('stats-remove', true, false); }
+function readAbout() {
+  const a = _siteData.about;
+  a.sectionLabel = document.getElementById('about-label').value;
+  a.sectionTitle = document.getElementById('about-title').value;
+  a.portrait = document.getElementById('about-portrait').value;
+  a.paragraphs = [0,1,2].map(i => document.getElementById('about-para-'+i)?.value || '');
+}
+
+// ── Works ──
+let _worksCounter = 0;
+function renderWorks() {
+  const list = document.getElementById('works-list');
+  if (!_worksData.items.length) {
+    list.innerHTML = '<p style="color:var(--ink-3);font-size:0.85rem;padding:20px 0">No works yet. Click "+ Add New Work" to get started.</p>';
+    return;
+  }
+  list.innerHTML = _worksData.items.map((w, i) => `
+    <div class="card" data-work-i="${i}">
+      <div class="card-header">
+        <img src="${w.src || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 48%22><rect fill=%22%23EAE3DA%22 width=%2264%22 height=%2248%22/><text x=%2232%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2216%22>🖼</text></svg>'}" class="card-thumb" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 48%22><rect fill=%22%23EAE3DA%22 width=%2264%22 height=%2248%22/><text x=%2232%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2216%22>🖼</text></svg>'">
+        <div>
+          <div class="card-title">${esc(w.caption || 'Untitled')}</div>
+          <div class="card-sub">${w.id}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleWork(${i})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="removeWork(${i})">×</button>
+        </div>
+      </div>
+      <div class="work-edit-form" id="work-form-${i}" style="display:none">
+        <div class="field-row" style="margin-top:12px">
+          <div class="field">
+            <label>ID (unique, e.g. w7)</label>
+            <input type="text" value="${esc(w.id)}" onchange="updateWork(${i},'id',this.value)">
+          </div>
+          <div class="field">
+            <label>Caption / Title</label>
+            <input type="text" value="${esc(w.caption)}" onchange="updateWork(${i},'caption',this.value)">
+          </div>
+        </div>
+        <div class="field">
+          <label>缩略图（拖拽图片或粘贴链接）</label>
+          <div class="upload-zone" id="upload-thumb-${i}">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>拖拽或点击上传</span>
+            <small>JPG, PNG, WEBP</small>
+          </div>
+          <input type="file" id="file-thumb-${i}" accept="image/*" style="display:none">
+          <input type="url" placeholder="或直接粘贴图片链接" value="${esc(w.src)}" onchange="updateWork(${i},'src',this.value)" style="margin-top:8px">
+        </div>
+        <div class="field">
+          <label>大图 / Lightbox（拖拽图片或粘贴链接）</label>
+          <div class="upload-zone" id="upload-full-${i}">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>拖拽或点击上传</span>
+            <small>JPG, PNG, WEBP</small>
+          </div>
+          <input type="file" id="file-full-${i}" accept="image/*" style="display:none">
+          <input type="url" placeholder="或直接粘贴图片链接" value="${esc(w.fullSrc)}" onchange="updateWork(${i},'fullSrc',this.value)" style="margin-top:8px">
+        </div>
+        <div class="field">
+          <label>Alt Text</label>
+          <input type="text" value="${esc(w.alt)}" onchange="updateWork(${i},'alt',this.value)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Bind upload zones
+  _worksData.items.forEach((w, i) => {
+    const thumbZone = document.getElementById('upload-thumb-' + i);
+    const thumbInput = document.getElementById('file-thumb-' + i);
+    const fullZone = document.getElementById('upload-full-' + i);
+    const fullInput = document.getElementById('file-full-' + i);
+    
+    if (thumbZone && thumbInput) {
+      setupUploadZone(thumbZone, thumbInput, (url) => {
+        updateWork(i, 'src', url);
+        thumbZone.nextElementSibling.value = url;
+      });
+    }
+    if (fullZone && fullInput) {
+      setupUploadZone(fullZone, fullInput, (url) => {
+        updateWork(i, 'fullSrc', url);
+        fullZone.nextElementSibling.value = url;
+      });
+    }
+  });
+}
+function toggleWork(i) {
+  const form = document.getElementById('work-form-' + i);
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+function updateWork(i, key, val) {
+  const old = _worksData.items[i][key];
+  _worksData.items[i][key] = val;
+  markChange('work-'+i+'-'+key, val, old);
+  if (key === 'caption' || key === 'src') renderWorks();
+}
+function addWork() {
+  const newId = 'w' + (Date.now() % 10000);
+  _worksData.items.push({ id: newId, src: '', fullSrc: '', caption: 'New Work', alt: 'New work' });
+  renderWorks(); markChange('works-add', true, false);
+}
+function removeWork(i) {
+  if (!confirm('Remove this work?')) return;
+  _worksData.items.splice(i, 1);
+  renderWorks(); markChange('works-remove', true, false);
+}
+
+// ── Videos ──
+function renderVideos() {
+  const list = document.getElementById('videos-list');
+  if (!_videosData.items.length) {
+    list.innerHTML = '<p style="color:var(--ink-3);font-size:0.85rem;padding:20px 0">No videos yet.</p>';
+    return;
+  }
+  list.innerHTML = _videosData.items.map((v, i) => `
+    <div class="card" data-video-i="${i}">
+      <div class="card-header">
+        <img src="${v.src || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 48%22><rect fill=%22%23EAE3DA%22 width=%2264%22 height=%2248%22/><text x=%2232%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2216%22>🎬</text></svg>'}" class="card-thumb" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 48%22><rect fill=%22%23EAE3DA%22 width=%2264%22 height=%2248%22/><text x=%2232%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2216%22>🎬</text></svg>'">
+        <div>
+          <div class="card-title">${esc(v.title)}</div>
+          <div class="card-sub">${esc(v.subtitle)}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleVideo(${i})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="removeVideo(${i})">×</button>
+        </div>
+      </div>
+      <div class="work-edit-form" id="video-form-${i}" style="display:none">
+        <div class="field-row" style="margin-top:12px">
+          <div class="field">
+            <label>ID</label>
+            <input type="text" value="${esc(v.id)}" onchange="updateVideo(${i},'id',this.value)">
+          </div>
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="${esc(v.title)}" onchange="updateVideo(${i},'title',this.value)">
+          </div>
+        </div>
+        <div class="field">
+          <label>Subtitle (e.g. Short Film · 2024)</label>
+          <input type="text" value="${esc(v.subtitle)}" onchange="updateVideo(${i},'subtitle',this.value)">
+        </div>
+        <div class="field">
+          <label>缩略图（拖拽上传或粘贴链接）</label>
+          <div class="upload-zone" id="upload-video-${i}">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>拖拽或点击上传</span>
+            <small>JPG, PNG, WEBP</small>
+          </div>
+          <input type="file" id="file-video-${i}" accept="image/*" style="display:none">
+          <input type="url" placeholder="或直接粘贴图片链接" value="${esc(v.src)}" onchange="updateVideo(${i},'src',this.value)" style="margin-top:8px">
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Bind upload zones
+  _videosData.items.forEach((v, i) => {
+    const zone = document.getElementById('upload-video-' + i);
+    const input = document.getElementById('file-video-' + i);
+    if (zone && input) {
+      setupUploadZone(zone, input, (url) => {
+        updateVideo(i, 'src', url);
+        zone.nextElementSibling.value = url;
+      });
+    }
+  });
+}
+function toggleVideo(i) { const f = document.getElementById('video-form-'+i); f.style.display = f.style.display==='none'?'block':'none'; }
+function updateVideo(i, key, val) { const old = _videosData.items[i][key]; _videosData.items[i][key] = val; markChange('video-'+i+'-'+key, val, old); if (key==='title'||key==='subtitle'||key==='src') renderVideos(); }
+function addVideo() { const id='v'+(Date.now()%10000); _videosData.items.push({id,src:'',title:'New Video',subtitle:'2025'}); renderVideos(); markChange('videos-add',true,false); }
+function removeVideo(i) { if(!confirm('Remove?'))return; _videosData.items.splice(i,1); renderVideos(); markChange('videos-remove',true,false); }
+
+// ── Projects ──
+function renderProjects() {
+  const list = document.getElementById('projects-list');
+  if (!_projectsData.items.length) {
+    list.innerHTML = '<p style="color:var(--ink-3);font-size:0.85rem;padding:20px 0">No projects yet.</p>';
+    return;
+  }
+  list.innerHTML = _projectsData.items.map((p, i) => `
+    <div class="card" data-project-i="${i}">
+      <div class="card-header">
+        <div style="width:64px;height:48px;background:var(--bg-alt);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem">📁</div>
+        <div>
+          <div class="card-title">${esc(p.name)}</div>
+          <div class="card-sub">${p.year} · ${(p.tags||[]).join(', ')}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleProject(${i})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="removeProject(${i})">×</button>
+        </div>
+      </div>
+      <div class="work-edit-form" id="project-form-${i}" style="display:none">
+        <div class="field-row" style="margin-top:12px">
+          <div class="field">
+            <label>Project Name</label>
+            <input type="text" value="${esc(p.name)}" onchange="updateProject(${i},'name',this.value)">
+          </div>
+          <div class="field">
+            <label>Year</label>
+            <input type="text" value="${esc(p.year)}" onchange="updateProject(${i},'year',this.value)">
+          </div>
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea rows="3" onchange="updateProject(${i},'desc',this.value)">${esc(p.desc)}</textarea>
+        </div>
+        <div class="field">
+          <label>Link URL</label>
+          <input type="url" value="${esc(p.link)}" onchange="updateProject(${i},'link',this.value)">
+        </div>
+        <div class="field">
+          <label>Tags (comma-separated)</label>
+          <input type="text" value="${esc((p.tags||[]).join(', '))}" onchange="updateProjectTags(${i},this.value)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function toggleProject(i) { const f=document.getElementById('project-form-'+i); f.style.display=f.style.display==='none'?'block':'none'; }
+function updateProject(i,key,val) { const old=_projectsData.items[i][key]; _projectsData.items[i][key]=val; markChange('project-'+i+'-'+key,val,old); if(key==='name'||key==='year'||key==='tags') renderProjects(); }
+function updateProjectTags(i,val) { _projectsData.items[i].tags = val.split(',').map(t=>t.trim()).filter(Boolean); markChange('project-tags',val,''); renderProjects(); }
+function addProject() { const id='p'+(Date.now()%10000); _projectsData.items.push({id,name:'New Project',desc:'',tags:['Tag1','Tag2'],year:'2025',link:'#'}); renderProjects(); markChange('projects-add',true,false); }
+function removeProject(i) { if(!confirm('Remove?'))return; _projectsData.items.splice(i,1); renderProjects(); markChange('projects-remove',true,false); }
+
+// ── Footer ──
+function renderFooter() {
+  const f = _siteData.footer;
+  document.getElementById('footer-logo').value = f.logo;
+  document.getElementById('footer-copy').value = f.copyright;
+  renderFooterLinks();
+}
+function renderFooterLinks() {
+  const container = document.getElementById('footer-links-list');
+  container.innerHTML = _siteData.footer.links.map((l, i) => `
+    <div class="card" style="display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:center">
+      <div class="field" style="margin:0">
+        <label>Label</label>
+        <input type="text" value="${esc(l.label)}" onchange="updateFooterLink(${i},'label',this.value)">
+      </div>
+      <div class="field" style="margin:0">
+        <label>URL</label>
+        <input type="text" value="${esc(l.href)}" onchange="updateFooterLink(${i},'href',this.value)">
+      </div>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="removeFooterLink(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+function updateFooterLink(i,key,val) { _siteData.footer.links[i][key]=val; markChange('footer-link-'+i+'-'+key,val,''); }
+function addFooterLink() { _siteData.footer.links.push({label:'New Link',href:'#'}); renderFooterLinks(); markChange('footer-links-add',true,false); }
+function removeFooterLink(i) { _siteData.footer.links.splice(i,1); renderFooterLinks(); markChange('footer-links-remove',true,false); }
+function readFooter() {
+  _siteData.footer.logo = document.getElementById('footer-logo').value;
+  _siteData.footer.copyright = document.getElementById('footer-copy').value;
+}
+
+// ── Bind all inputs ──
+function bindAllInputs() {
+  document.querySelectorAll('#panel-hero input,#panel-hero textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      readHero();
+      markChange('hero-'+el.id, el.value, _origSite.site[el.id] || '');
+    });
+  });
+  document.querySelectorAll('#panel-about input,#panel-about textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      readAbout();
+      markChange('about-'+el.id, el.value, _origSite.about[el.id] || '');
+    });
+  });
+  document.querySelectorAll('#panel-footer input').forEach(el => {
+    el.addEventListener('input', () => {
+      readFooter();
+      markChange('footer-'+el.id, el.value, _origSite.footer[el.id] || '');
+    });
+  });
+}
+
+// ── Reset ──
+function resetAll() {
+  if (!confirm('Discard all unsaved changes?')) return;
+  _siteData = JSON.parse(JSON.stringify(_origSite));
+  _worksData = JSON.parse(JSON.stringify(_origWorks));
+  _videosData = JSON.parse(JSON.stringify(_origVideos));
+  _projectsData = JSON.parse(JSON.stringify(_origProjects));
+  _changes = {};
+  document.getElementById('saveBar').classList.remove('visible');
+  renderHero(); renderAbout(); renderWorks(); renderVideos(); renderProjects(); renderFooter();
+  showToast('Changes discarded.');
+}
+
+// ── Export all ──
+function exportAll() {
+  readHero(); readAbout(); readFooter();
+  exportFile('site.json', _siteData);
+  exportFile('works.json', _worksData);
+  exportFile('videos.json', _videosData);
+  exportFile('projects.json', _projectsData);
+  _changes = {};
+  document.getElementById('saveBar').classList.remove('visible');
+  showToast('✓ All files exported! Upload them to your hosting /data/ folder.');
+}
+
+function exportFile(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Toast ──
+function showToast(msg, isError) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── Escape ──
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── ImgBB Config ──
+// 申请地址: https://api.imgbb.com/
+// 注册后在这里获取 API Key: https://imgbb.com/profile
+const IMGBB_API_KEY = '1550e9a8f09ad2801b4fc86265edf7c5'; // 替换成你的 ImgBB API Key
+
+// ── Upload to ImgBB ──
+async function uploadToImgBB(file) {
+  if (IMGBB_API_KEY === '1550e9a8f09ad2801b4fc86265edf7c5' || !IMGBB_API_KEY) {
+    throw new Error('请先填写 ImgBB API Key（见页面顶部说明）');
+  }
+  const url = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
+  const formData = new FormData();
+  formData.append('image', file);
+  const resp = await fetch(url, { method: 'POST', body: formData });
+  const data = await resp.json();
+  if (data.success) {
+    return data.data.url;
+  } else {
+    throw new Error(data.error?.message || '上传失败');
+  }
+}
+
+// ── Setup Upload Zone ──
+function setupUploadZone(zoneEl, inputEl, onUploaded) {
+  zoneEl.addEventListener('click', () => inputEl.click());
+  zoneEl.addEventListener('dragover', (e) => { e.preventDefault(); zoneEl.classList.add('dragover'); });
+  zoneEl.addEventListener('dragleave', () => zoneEl.classList.remove('dragover'));
+  zoneEl.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    zoneEl.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length) await handleUpload(files[0], zoneEl, onUploaded);
+  });
+  inputEl.addEventListener('change', async () => {
+    if (inputEl.files.length) await handleUpload(inputEl.files[0], zoneEl, onUploaded);
+  });
+}
+
+async function handleUpload(file, zoneEl, onUploaded) {
+  if (!file.type.startsWith('image/')) {
+    showToast('⚠ 请选择图片文件', true);
+    return;
+  }
+  zoneEl.classList.add('uploading');
+  zoneEl.querySelector('span').textContent = '上传中...';
+  try {
+    const url = await uploadToImgBB(file);
+    zoneEl.classList.remove('uploading');
+    zoneEl.querySelector('span').textContent = '拖拽或点击上传';
+    showToast('✓ 上传成功！');
+    onUploaded(url);
+  } catch (err) {
+    zoneEl.classList.remove('uploading');
+    zoneEl.querySelector('span').textContent = '拖拽或点击上传';
+    showToast('⚠ ' + err.message, true);
+  }
+}
+
+// ── Init ──
+boot();
+</script>
+</body>
+</html>

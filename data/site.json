@@ -1,0 +1,33 @@
+{
+  "site": {
+    "logo": "Studio",
+    "heroNumber": "05",
+    "label": "Visual Artist & Creative Director",
+    "title": "Framing the world\nthrough quiet light",
+    "subtitle": "Based in Shanghai — Available worldwide"
+  },
+  "about": {
+    "sectionLabel": "About",
+    "sectionTitle": "The Practice",
+    "portrait": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80",
+    "paragraphs": [
+      "I create visual stories through photography and film, capturing moments that speak louder than words.",
+      "Every frame is a new perspective — a quiet observation of the world, distilled into light and shadow."
+    ],
+    "stats": [
+      { "label": "Works", "number": "128" },
+      { "label": "Clients", "number": "56" },
+      { "label": "Years", "number": "8" },
+      { "label": "Awards", "number": "12" }
+    ]
+  },
+  "footer": {
+    "logo": "Studio",
+    "copyright": "© 2024 Studio. All rights reserved.",
+    "links": [
+      { "label": "Instagram", "href": "https://instagram.com/yourname" },
+      { "label": "YouTube", "href": "https://youtube.com/@yourname" },
+      { "label": "Email", "href": "mailto:your@email.com" }
+    ]
+  }
+}
