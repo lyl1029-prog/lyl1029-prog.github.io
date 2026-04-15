@@ -2,8 +2,8 @@
   "items": [
     {
       "id": "w1",
-      "src": "https://github.com/lyl1029-prog/lyl1029-prog.github.io/DSC08418.jpg",
-      "fullSrc": "https://github.com/lyl1029-prog/lyl1029-prog.github.io/DSC08418.jpg",
+"src": "https://raw.githubusercontent.com/lyl1029-prog/lyl1029-prog.github.io/main/DSC08418.jpg",
+"fullSrc": "https://raw.githubusercontent.com/lyl1029-prog/lyl1029-prog.github.io/main/DSC08418.jpg",
       "caption": "Smile",
       "alt": "Portrait"
     },
